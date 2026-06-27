@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+html, body, #root { height: 100%; }
+body { font-family: 'Inter', system-ui, sans-serif; }
+
+.flag-bar {
+  background: linear-gradient(to right,
+    #007a5e 0%, #007a5e 33.33%,
+    #ce1126 33.33%, #ce1126 66.66%,
+    #fcd116 66.66%, #fcd116 100%);
+}
+
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition; }
+.btn-primary { @apply btn bg-cm-green hover:bg-cm-green-dark text-white; }
+.btn-red { @apply btn bg-cm-red hover:bg-cm-red-dark text-white; }
+.btn-yellow { @apply btn bg-cm-yellow hover:bg-cm-yellow-dark text-cm-ink; }
+.btn-ghost { @apply btn border border-cm-line hover:bg-cm-panel text-white; }
+.card { @apply bg-cm-panel border border-cm-line rounded-lg; }
+.input { @apply w-full bg-cm-ink border border-cm-line rounded-md px-3 py-2 text-white placeholder:text-cm-muted focus:outline-none focus:border-cm-green; }
+.label { @apply block text-sm font-medium text-white/80 mb-1; }
+code, pre { font-family: 'JetBrains Mono', monospace; }

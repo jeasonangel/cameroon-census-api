@@ -1,0 +1,10 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["/package.json", "package.json"],
+      "url": "file:///c:/Users/DELL/Downloads/cameroon-census-api/.vscode/.schemas/package.json"
+    }
+  ]
+  ,
+  "json.schemaDownload.enable": false
+}
