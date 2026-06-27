@@ -88,6 +88,7 @@ See full route map in the original spec. All routes except `/auth/register` and
 Counter resets monthly (calendar month). Returns HTTP 429 when exceeded.
 
 ## Caching
+
 Redis caches:
 - Geography responses: 24 h
 - Data / indicator responses: 1 h
