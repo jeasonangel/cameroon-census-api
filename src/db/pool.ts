@@ -2,8 +2,8 @@ import { Pool } from 'pg';
 import { config } from '../config';
 
 export const pool = new Pool(
-  config.DATABASE_URL
-    ? { connectionString: config.DATABASE_URL }
+  config.databaseUrl
+    ? { connectionString: config.databaseUrl }
     : {} // falls back to PGHOST/PGUSER/... env vars
 );
 
