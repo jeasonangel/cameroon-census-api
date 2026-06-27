@@ -1,5 +1,12 @@
-// src/types/express.d.ts
+import { Request } from 'express';
 import { User } from './index';
+declare global {
+  namespace Express {
+    interface Request {
+      startTime?: number;
+    }
+  }
+}
 
 declare global {
     namespace Express {
