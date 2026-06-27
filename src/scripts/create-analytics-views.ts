@@ -16,19 +16,8 @@ async function createAnalyticsViews() {
         
         for (const statement of statements) {
             if (statement.trim().startsWith('--')) continue;
-            const trimmed = statement.trim();
-            if (!trimmed) continue;
-            console.log(`  ▶️ Executing: ${trimmed.substring(0, 60)}...`);
-            try {
-                await query(statement);
-            } catch (err: any) {
-                // If the materialized view (relation) already exists, skip and continue
-                if (err && (err.code === '42P07' || /already exists/.test(String(err.message || '')))) {
-                    console.warn('  ⚠️ Relation already exists — skipping.');
-                    continue;
-                }
-                throw err;
-            }
+            console.log(`  ▶️ Executing: ${statement.substring(0, 60)}...`);
+            await query(statement);
         }
         
         console.log('\n✅ All analytics views created successfully!');

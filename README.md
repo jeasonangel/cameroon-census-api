@@ -88,6 +88,8 @@ See full route map in the original spec. All routes except `/auth/register` and
 Counter resets monthly (calendar month). Returns HTTP 429 when exceeded.
 
 ## Caching
+internal redis URL: redis://red-d8vro9egvqtc738s756g:6379
+external db url: postgresql://census_user:4059DP0vfizQRDdNqWLLCenHSlDhF5BN@dpg-d8vsj2ugvqtc738t4uu0-a.oregon-postgres.render.com/cameroon_census
 
 Redis caches:
 - Geography responses: 24 h
