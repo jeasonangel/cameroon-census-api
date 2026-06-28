@@ -56,6 +56,7 @@ See full route map in the original spec. All routes except `/auth/register` and
 - `GET    /api/v1/auth/usage`          (auth)
 
 ### Geography
+
 - `GET /api/v1/geography/regions`
 - `GET /api/v1/geography/regions/:regionCode/departments`
 - `GET /api/v1/geography/departments/:departmentCode/districts`
