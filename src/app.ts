@@ -24,29 +24,23 @@ export function buildApp() {
 // In your src/app.ts - Update the CORS configuration
 
 
-// ✅ Improved CORS configuration for Railway
+// Improved CORS configuration
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) {
-      return callback(null, true);
-    }
+    if (!origin) return callback(null, true);
     
-    // Get allowed origins from config
     const allowedOrigins = config.corsOrigin === '*' 
       ? ['*'] 
       : config.corsOrigin.split(',').map((s) => s.trim());
     
-    // Check if origin is allowed
     if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      // For development, allow all
       if (config.nodeEnv === 'development') {
         callback(null, true);
       } else {
         console.warn(`🚫 CORS blocked origin: ${origin}`);
-        callback(null, true); // Still allow, but log it
+        callback(null, true);
       }
     }
   },
@@ -54,11 +48,11 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
   exposedHeaders: ['Content-Range', 'X-Total-Count'],
-  maxAge: 86400, // 24 hours
 };
 
+app.use(cors(corsOptions));
+
   
-  app.use(cors(corsOptions));
   app.use(compression());
   app.use(express.json({ limit: '2mb' }));
   app.use(morgan('tiny'));
