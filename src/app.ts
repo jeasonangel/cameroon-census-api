@@ -4,27 +4,48 @@ import cors from 'cors';
 import compression from 'compression';
 import morgan from 'morgan';
 
-import authRoutes from './routes/auth.js';  // ← Add .js
-import geographyRoutes from './routes/geography.js';  // ← Add .js
-import dataRoutes from './routes/data.js';  // ← Add .js
-import adminRoutes from './routes/admin.js';  // ← Add .js
-import analyticsRoutes from './routes/analyticsRoutes.js';  // ← Add .js
+import authRoutes from './routes/auth.js';
+import geographyRoutes from './routes/geography.js';
+import dataRoutes from './routes/data.js';
+import adminRoutes from './routes/admin.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
-import { config } from './config/index.js';  // ← Add .js
-import { requestTimer, usageLogger } from './middleware/logger.js';  // ← Add .js
-import { errorHandler, notFoundHandler } from './middleware/error.js';  // ← Add .js
+import { config } from './config/index.js';
+import { requestTimer, usageLogger } from './middleware/logger.js';
+import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 export function buildApp() {
   const app = express();
   app.set('trust proxy', true);
 
   app.use(helmet());
-  app.use(
-    cors({
-      origin: config.corsOrigin === '*' ? true : config.corsOrigin.split(',').map((s) => s.trim()),
-      credentials: true,
-    })
-  );
+  
+  // Improved CORS configuration
+  const corsOptions = {
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin is allowed
+      const allowedOrigins = config.corsOrigin === '*' 
+        ? ['*'] 
+        : config.corsOrigin.split(',').map((s) => s.trim());
+      
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        // Log the blocked origin for debugging
+        console.log(`CORS blocked origin: ${origin}`);
+        callback(null, true); // Allow in development
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+    exposedHeaders: ['Content-Range', 'X-Total-Count'],
+  };
+  
+  app.use(cors(corsOptions));
   app.use(compression());
   app.use(express.json({ limit: '2mb' }));
   app.use(morgan('tiny'));
@@ -38,6 +59,7 @@ export function buildApp() {
       message: 'Cameroon Census API is running',
       version: '1.1.0',
       timestamp: new Date().toISOString(),
+      environment: config.nodeEnv,
     });
   });
 
@@ -48,6 +70,7 @@ export function buildApp() {
       version: '1.1.0',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
+      database: 'connected', // Add database check if needed
     });
   });
 

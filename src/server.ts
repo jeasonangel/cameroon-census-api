@@ -1,12 +1,12 @@
-import { buildApp } from './app.js';  // ← Add .js
-import { config } from './config/index.js';  // ← Add .js
+import { buildApp } from './app.js';
+import { config } from './config/index.js';
 
 const app = buildApp();
 
-// Parse PORT to number explicitly
-const PORT = parseInt(process.env.PORT || '3000', 10);
+// Use config port instead of hardcoding
+const PORT = config.port;
 
-// Bind to 0.0.0.0 to accept connections from outside the container
+// For Railway, we need to listen on all interfaces
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Cameroon Census API listening on :${PORT} [${config.nodeEnv}]`);
 });
@@ -20,4 +20,14 @@ process.on('SIGTERM', () => {
 process.on('SIGINT', () => {
   console.log('🛑 Received SIGINT, shutting down gracefully...');
   process.exit(0);
+});
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('💥 Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
 });
