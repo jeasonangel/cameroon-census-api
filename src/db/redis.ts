@@ -1,19 +1,16 @@
 import Redis from 'ioredis';
-import { config } from '../config';
-
-// Check if Redis URL is valid and not localhost fallback
-const isRedisConfigured = config.redisUrl && config.redisUrl !== 'redis://localhost:6379';
+import { config } from '../config/index.js';  // ← Go up one level to src/config
 
 let redis: Redis | null = null;
 let isRedisAvailable = false;
 
-if (isRedisConfigured) {
+// Only try to connect if Redis URL is configured
+if (config.redisUrl) {
   try {
     redis = new Redis(config.redisUrl, {
       maxRetriesPerRequest: 2,
-      lazyConnect: true, // Don't connect immediately
+      lazyConnect: true,
       retryStrategy: (times) => {
-        // Only retry a few times, then give up
         if (times > 3) {
           console.warn('⚠️ Redis connection failed after 3 retries, continuing without Redis');
           return null;
@@ -22,7 +19,6 @@ if (isRedisConfigured) {
       },
     });
 
-    // Handle connection events
     redis.on('error', (err) => {
       console.warn('⚠️ Redis error:', err.message);
       isRedisAvailable = false;
@@ -43,11 +39,9 @@ if (isRedisConfigured) {
       isRedisAvailable = false;
     });
 
-    // Set a timeout - if Redis doesn't connect in 5 seconds, continue without it
     setTimeout(() => {
       if (!isRedisAvailable) {
         console.warn('ℹ️ Redis not available, running in degraded mode without caching');
-        // Don't kill the app - just log and continue
       }
     }, 5000);
 
@@ -57,20 +51,16 @@ if (isRedisConfigured) {
     isRedisAvailable = false;
   }
 } else {
-  console.log('ℹ️ Redis not configured (using localhost fallback), running without Redis');
+  console.log('ℹ️ Redis not configured, running without Redis');
 }
 
-// Helper function to check if Redis is available
 function checkRedis(): boolean {
-  if (!redis || !isRedisAvailable) {
-    return false;
-  }
-  return true;
+  return !!redis && isRedisAvailable;
 }
 
 export async function cacheGet<T>(key: string): Promise<T | null> {
   if (!checkRedis()) {
-    return null; // Skip cache if Redis is not available
+    return null;
   }
   
   try {
@@ -84,20 +74,19 @@ export async function cacheGet<T>(key: string): Promise<T | null> {
 
 export async function cacheSet(key: string, value: unknown, ttlSeconds: number): Promise<void> {
   if (!checkRedis()) {
-    return; // Skip cache if Redis is not available
+    return;
   }
   
   try {
     await redis!.set(key, JSON.stringify(value), 'EX', ttlSeconds);
   } catch (error) {
     console.warn('Redis cache set failed:', error instanceof Error ? error.message : 'Unknown error');
-    // ignore cache failures
   }
 }
 
 export async function cacheInvalidate(pattern: string): Promise<void> {
   if (!checkRedis()) {
-    return; // Skip cache invalidation if Redis is not available
+    return;
   }
   
   try {
@@ -109,7 +98,6 @@ export async function cacheInvalidate(pattern: string): Promise<void> {
     if (keys.length) await redis!.del(keys);
   } catch (error) {
     console.warn('Redis cache invalidation failed:', error instanceof Error ? error.message : 'Unknown error');
-    // ignore
   }
 }
 

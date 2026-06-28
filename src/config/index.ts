@@ -5,7 +5,10 @@ export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   databaseUrl: process.env.DATABASE_URL,
-  redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
+  // Only use Redis if REDIS_URL is explicitly set and not localhost
+  redisUrl: (process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379') 
+    ? process.env.REDIS_URL 
+    : '',
   bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
   jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
