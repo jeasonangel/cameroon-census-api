@@ -1,8 +1,8 @@
 // src/middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
-import { query } from '../db/pool';
-import { compareApiKey } from '../utils/apiKey';
-import { Unauthorized, TooManyRequests, Forbidden } from '../utils/errors';
+import { query } from '../db/pool.js';
+import { compareApiKey } from '../utils/apiKey.js';
+import { Unauthorized, TooManyRequests, Forbidden } from '../utils/errors.js';
 
 /**
  * authenticate — validates X-API-Key on data endpoints.

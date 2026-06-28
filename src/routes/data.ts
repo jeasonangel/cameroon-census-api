@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { stringify } from 'csv-stringify/sync';
-import { query } from '../db/pool';
-import { authenticateOrSession as authenticate } from '../middleware/either';
-import { cacheGet, cacheSet, CACHE_TTL } from '../db/redis';
-import { BadRequest } from '../utils/errors';
+import { query } from '../db/pool.js';
+import { authenticateOrSession as authenticate } from '../middleware/either.js';
+import { cacheGet, cacheSet, CACHE_TTL } from '../db/redis.js';
+import { BadRequest } from '../utils/errors.js';
 
 const router = Router();
 router.use(authenticate);
@@ -49,10 +49,10 @@ router.get('/data', async (req, res, next) => {
       throw BadRequest('Invalid year');
     }
     const key = `data:${geo ?? ''}:${ind ?? ''}:${year ?? ''}`;
-    const hit = await cacheGet(key);
+    const hit = await cacheGet<any[]>(key);
     if (hit) return res.json({ data: hit });
     const rows = await fetchData(geo, ind, year);
-    await cacheSet(key, rows, CACHE_TTL.DATA);
+    await cacheSet(key, rows, CACHE_TTL);
     res.json({ data: rows });
   } catch (e) {
     next(e);
@@ -61,13 +61,15 @@ router.get('/data', async (req, res, next) => {
 
 router.get('/indicators', async (_req, res, next) => {
   try {
-    const hit = await cacheGet('indicators:all');
+    // ✅ Fixed: Use the actual cache key string
+    const cacheKey = 'indicators:all';
+    const hit = await cacheGet<any[]>(cacheKey);
     if (hit) return res.json({ data: hit });
     const { rows } = await query(
       `SELECT id, code, name, description, unit, category, source
        FROM indicators WHERE is_active = TRUE ORDER BY category, code`
     );
-    await cacheSet('indicators:all', rows, CACHE_TTL.DATA);
+    await cacheSet(cacheKey, rows, CACHE_TTL);
     res.json({ data: rows });
   } catch (e) {
     next(e);

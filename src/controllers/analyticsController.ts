@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { query } from '../db/pool';
-import { BadRequest } from '../utils/errors';
+import { query } from '../db/pool.js';
+import { BadRequest } from '../utils/errors.js';
 
 export const analyticsController = {
     // GET /api/v1/analytics/regions

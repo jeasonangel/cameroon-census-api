@@ -1,11 +1,11 @@
 // src/middleware/either.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { authenticate } from './auth';
-import { config } from '../config';
-import { query } from '../db/pool';
-import { Unauthorized } from '../utils/errors';
-import type { SessionPayload } from './session';
+import { authenticate } from './auth.js';
+import { config } from '../config/index.js';
+import { query } from '../db/pool.js';
+import { Unauthorized } from '../utils/errors.js';
+import type { SessionPayload } from './session.js';
 
 export async function authenticateOrSession(req: Request, res: Response, next: NextFunction) {
   const header = req.header('Authorization') || '';

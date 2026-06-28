@@ -21,29 +21,42 @@ export function buildApp() {
   app.use(helmet());
   
   // Improved CORS configuration
-  const corsOptions = {
-    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-      
-      // Check if origin is allowed
-      const allowedOrigins = config.corsOrigin === '*' 
-        ? ['*'] 
-        : config.corsOrigin.split(',').map((s) => s.trim());
-      
-      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+// In your src/app.ts - Update the CORS configuration
+
+
+// ✅ Improved CORS configuration for Railway
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Get allowed origins from config
+    const allowedOrigins = config.corsOrigin === '*' 
+      ? ['*'] 
+      : config.corsOrigin.split(',').map((s) => s.trim());
+    
+    // Check if origin is allowed
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // For development, allow all
+      if (config.nodeEnv === 'development') {
         callback(null, true);
       } else {
-        // Log the blocked origin for debugging
-        console.log(`CORS blocked origin: ${origin}`);
-        callback(null, true); // Allow in development
+        console.warn(`🚫 CORS blocked origin: ${origin}`);
+        callback(null, true); // Still allow, but log it
       }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-    exposedHeaders: ['Content-Range', 'X-Total-Count'],
-  };
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
+  exposedHeaders: ['Content-Range', 'X-Total-Count'],
+  maxAge: 86400, // 24 hours
+};
+
   
   app.use(cors(corsOptions));
   app.use(compression());

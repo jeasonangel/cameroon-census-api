@@ -4,12 +4,12 @@ import multer from 'multer';
 import bcrypt from 'bcrypt';
 import { parse } from 'csv-parse/sync';
 import { z } from 'zod';
-import { query, pool } from '../db/pool';
-import { requireSession, requireSessionAdmin } from '../middleware/session';
-import { config, RATE_LIMITS, USER_TYPES } from '../config';
-import { generateApiKey, hashApiKey } from '../utils/apiKey';
-import { BadRequest, Conflict, NotFound } from '../utils/errors';
-import { cacheInvalidate } from '../db/redis';
+import { query, pool } from '../db/pool.js';
+import { requireSession, requireSessionAdmin } from '../middleware/session.js';
+import { config, RATE_LIMITS, USER_TYPES } from '../config/index.js';
+import { generateApiKey, hashApiKey } from '../utils/apiKey.js';
+import { BadRequest, Conflict, NotFound } from '../utils/errors.js';
+import { cacheInvalidate } from '../db/redis.js';
 
 const router = Router();
 

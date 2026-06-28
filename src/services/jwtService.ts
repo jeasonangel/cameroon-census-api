@@ -1,6 +1,6 @@
 // src/services/jwtService.ts
 import jwt from 'jsonwebtoken';
-import { config } from '../config';
+import { config } from '../config/index.js';
 
 const JWT_SECRET = config.jwtSecret || 'your-secret-key';
 const JWT_EXPIRES_IN = config.jwtExpiresIn || '7d';

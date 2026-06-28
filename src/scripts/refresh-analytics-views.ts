@@ -1,5 +1,5 @@
-import { query } from '../db/pool';
-import { pool } from '../db/pool';
+import { query } from '../db/pool.js';
+import { pool } from '../db/pool.js';
 async function refreshAnalyticsViews() {
     console.log('🔄 Refreshing analytics materialized views...');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

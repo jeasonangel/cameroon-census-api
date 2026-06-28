@@ -1,9 +1,9 @@
 // src/middleware/session.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { config } from '../config';
-import { query } from '../db/pool';
-import { Unauthorized, Forbidden } from '../utils/errors';
+import { config } from '../config/index.js';
+import { query } from '../db/pool.js';
+import { Unauthorized, Forbidden } from '../utils/errors.js';
 
 export interface SessionPayload {
   uid: number;

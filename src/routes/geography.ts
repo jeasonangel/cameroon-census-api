@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { query } from '../db/pool';
-import { authenticateOrSession as authenticate } from '../middleware/either';
-import { cacheGet, cacheSet, CACHE_TTL } from '../db/redis';
-import { BadRequest, NotFound } from '../utils/errors';
+import { query } from '../db/pool.js';
+import { authenticateOrSession as authenticate } from '../middleware/either.js'; // ✅ Added .js
+import { cacheGet, cacheSet, CACHE_TTL } from '../db/redis.js';
+import { BadRequest, NotFound } from '../utils/errors.js';
 
 const router = Router();
 router.use(authenticate);
@@ -17,7 +17,7 @@ async function withCache<T>(key: string, ttl: number, fn: () => Promise<T>): Pro
 
 router.get('/regions', async (_req, res, next) => {
   try {
-    const data = await withCache('geo:regions', CACHE_TTL.GEOGRAPHY, async () => {
+    const data = await withCache('geo:regions', CACHE_TTL, async () => {
       const { rows } = await query(
         `SELECT id, code, name, population, area_km2, latitude, longitude
          FROM spatial_geo WHERE level = 'region' ORDER BY name`
@@ -33,7 +33,7 @@ router.get('/regions', async (_req, res, next) => {
 router.get('/regions/:regionCode/departments', async (req, res, next) => {
   try {
     const code = req.params.regionCode;
-    const data = await withCache(`geo:dept:${code}`, CACHE_TTL.GEOGRAPHY, async () => {
+    const data = await withCache(`geo:dept:${code}`, CACHE_TTL, async () => {
       const parent = await query(`SELECT id FROM spatial_geo WHERE code = $1 AND level = 'region'`, [code]);
       if (parent.rowCount === 0) throw NotFound('Region not found');
       const { rows } = await query(
@@ -52,7 +52,7 @@ router.get('/regions/:regionCode/departments', async (req, res, next) => {
 router.get('/departments/:departmentCode/districts', async (req, res, next) => {
   try {
     const code = req.params.departmentCode;
-    const data = await withCache(`geo:dist:${code}`, CACHE_TTL.GEOGRAPHY, async () => {
+    const data = await withCache(`geo:dist:${code}`, CACHE_TTL, async () => {
       const parent = await query(`SELECT id FROM spatial_geo WHERE code = $1 AND level = 'department'`, [code]);
       if (parent.rowCount === 0) throw NotFound('Department not found');
       const { rows } = await query(
@@ -71,7 +71,7 @@ router.get('/departments/:departmentCode/districts', async (req, res, next) => {
 router.get('/districts/:districtCode/villages', async (req, res, next) => {
   try {
     const code = req.params.districtCode;
-    const data = await withCache(`geo:vill:${code}`, CACHE_TTL.GEOGRAPHY, async () => {
+    const data = await withCache(`geo:vill:${code}`, CACHE_TTL, async () => {
       const parent = await query(`SELECT id FROM spatial_geo WHERE code = $1 AND level = 'district'`, [code]);
       if (parent.rowCount === 0) throw NotFound('District not found');
       const { rows } = await query(

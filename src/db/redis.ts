@@ -1,109 +1,110 @@
+// src/db/redis.ts
 import Redis from 'ioredis';
-import { config } from '../config/index.js';  // ← Go up one level to src/config
+import { config } from '../config/index.js';
 
 let redis: Redis | null = null;
-let isRedisAvailable = false;
 
-// Only try to connect if Redis URL is configured
+// Only create Redis connection if URL is provided
 if (config.redisUrl) {
   try {
     redis = new Redis(config.redisUrl, {
-      maxRetriesPerRequest: 2,
-      lazyConnect: true,
-      retryStrategy: (times) => {
+      maxRetriesPerRequest: 3,
+      retryStrategy: (times: number) => {
         if (times > 3) {
-          console.warn('⚠️ Redis connection failed after 3 retries, continuing without Redis');
+          console.log('❌ Redis: Max retries reached, stopping retry');
           return null;
         }
         return Math.min(times * 100, 3000);
       },
     });
 
-    redis.on('error', (err) => {
-      console.warn('⚠️ Redis error:', err.message);
-      isRedisAvailable = false;
-    });
-
     redis.on('connect', () => {
-      console.log('✅ Redis connected successfully');
-      isRedisAvailable = true;
+      console.log('✅ Redis connected');
     });
 
-    redis.on('ready', () => {
-      isRedisAvailable = true;
+    redis.on('error', (err: Error) => {
+      console.error('❌ Redis error:', err.message);
     });
-
-    // Try to connect
-    redis.connect().catch(() => {
-      console.warn('⚠️ Redis connection failed, continuing without Redis');
-      isRedisAvailable = false;
-    });
-
-    setTimeout(() => {
-      if (!isRedisAvailable) {
-        console.warn('ℹ️ Redis not available, running in degraded mode without caching');
-      }
-    }, 5000);
-
   } catch (error) {
-    console.warn('⚠️ Redis initialization failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.warn('⚠️ Redis connection failed, continuing without cache');
     redis = null;
-    isRedisAvailable = false;
   }
 } else {
-  console.log('ℹ️ Redis not configured, running without Redis');
+  console.log('ℹ️ Redis not configured, running without cache');
 }
 
-function checkRedis(): boolean {
-  return !!redis && isRedisAvailable;
-}
+// ─── CACHE FUNCTIONS ───
 
-export async function cacheGet<T>(key: string): Promise<T | null> {
-  if (!checkRedis()) {
+// Cache TTL in seconds (5 minutes default)
+export const CACHE_TTL = 300;
+
+/**
+ * Get cached data
+ */
+export async function cacheGet<T = any>(key: string): Promise<T | null> {
+  if (!redis) return null;
+  try {
+    const data = await redis.get(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Cache get error:', error);
     return null;
   }
-  
+}
+
+/**
+ * Set cached data
+ */
+export async function cacheSet<T = any>(
+  key: string, 
+  data: T, 
+  ttl: number = CACHE_TTL
+): Promise<void> {
+  if (!redis) return;
   try {
-    const val = await redis!.get(key);
-    return val ? (JSON.parse(val) as T) : null;
+    await redis.set(key, JSON.stringify(data), 'EX', ttl);
   } catch (error) {
-    console.warn('Redis cache get failed:', error instanceof Error ? error.message : 'Unknown error');
-    return null;
+    console.error('Cache set error:', error);
   }
 }
 
-export async function cacheSet(key: string, value: unknown, ttlSeconds: number): Promise<void> {
-  if (!checkRedis()) {
-    return;
-  }
-  
+/**
+ * Delete cached data
+ */
+export async function cacheDelete(key: string): Promise<void> {
+  if (!redis) return;
   try {
-    await redis!.set(key, JSON.stringify(value), 'EX', ttlSeconds);
+    await redis.del(key);
   } catch (error) {
-    console.warn('Redis cache set failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Cache delete error:', error);
   }
 }
 
+/**
+ * Invalidate cache by pattern
+ */
 export async function cacheInvalidate(pattern: string): Promise<void> {
-  if (!checkRedis()) {
-    return;
-  }
-  
+  if (!redis) return;
   try {
-    const stream = redis!.scanStream({ match: pattern, count: 100 });
-    const keys: string[] = [];
-    for await (const chunk of stream) {
-      keys.push(...(chunk as string[]));
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) {
+      await redis.del(...keys);
     }
-    if (keys.length) await redis!.del(keys);
   } catch (error) {
-    console.warn('Redis cache invalidation failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Cache invalidation error:', error);
   }
 }
 
-export { redis, isRedisAvailable };
+/**
+ * Clear all cache
+ */
+export async function cacheClear(): Promise<void> {
+  if (!redis) return;
+  try {
+    await redis.flushall();
+  } catch (error) {
+    console.error('Cache clear error:', error);
+  }
+}
 
-export const CACHE_TTL = {
-  GEOGRAPHY: 60 * 60 * 24, // 24h
-  DATA: 60 * 60, // 1h
-};
+export { redis };

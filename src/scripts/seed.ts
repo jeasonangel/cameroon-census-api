@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
-import { pool, query } from '../db/pool';
-import { config, RATE_LIMITS } from '../config';
-import { generateApiKey, hashApiKey } from '../utils/apiKey';
+import { pool, query } from '../db/pool.js';
+import { config, RATE_LIMITS } from '../config/index.js';
+import { generateApiKey, hashApiKey } from '../utils/apiKey.js';
 
 // ============================================================
 // 1. REGIONS (10 Regions of Cameroon)

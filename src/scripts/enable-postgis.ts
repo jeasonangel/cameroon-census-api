@@ -1,5 +1,5 @@
 // scripts/enable-postgis.ts
-import { query } from '../db/pool';
+import { query } from '../db/pool.js';
 
 async function enablePostGIS() {
   try {

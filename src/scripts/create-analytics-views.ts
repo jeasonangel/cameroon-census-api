@@ -1,7 +1,7 @@
-import { query } from '../db/pool';
+import { query } from '../db/pool.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import { pool } from '../db/pool';
+import { pool } from '../db/pool.js';
 async function createAnalyticsViews() {
     console.log('🗃️ Creating analytics materialized views...');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
