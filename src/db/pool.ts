@@ -1,10 +1,11 @@
+// src/db/pool.ts
 import { Pool } from 'pg';
 import { config } from '../config';
 
 export const pool = new Pool(
   config.databaseUrl
-    ? { connectionString: config.databaseUrl }
-    : {} // falls back to PGHOST/PGUSER/... env vars
+    ? { connectionString: config.databaseUrl, ssl: { rejectUnauthorized: false } }
+    : {}
 );
 
 pool.on('error', (err) => {
