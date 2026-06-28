@@ -4,7 +4,7 @@ import axios from 'axios';
 // ✅ Fix: Use VITE_API_BASE with fallback
 const API_BASE = import.meta.env.VITE_API_BASE || 
                  import.meta.env.VITE_API_URL || 
-                 '/api/v1';
+                 'https://cameroon-census-api-production.up.railway.app/api/v1';
 
 // Log the API URL in development
 if (import.meta.env.DEV) {
