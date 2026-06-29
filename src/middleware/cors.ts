@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 
 const allowedOrigins = [
   'https://frontend-production-1a46.up.railway.app',
-  'https://cameroon-census-frontend.up.railway.app',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:4173',
