@@ -1,24 +1,17 @@
 // src/database/index.ts
 import { Pool } from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 console.log('🔌 Initializing database connection...');
 
-// Get connection string from environment
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  console.error('❌ DATABASE_URL is not set in environment variables');
-  process.exit(1);
-}
-
-// Create pool with connection string
+// Use individual connection parameters
 const pool = new Pool({
-  connectionString: databaseUrl,
+  host: process.env.PGHOST || 'aws-1-eu-west-2.pooler.supabase.com',
+  port: parseInt(process.env.PGPORT || '5432', 10),
+  user: process.env.PGUSER || 'postgres.pndihochpbghcphpwvbyx',
+  password: process.env.PGPASSWORD || 'Mesanges1234',
+  database: process.env.PGDATABASE || 'postgres',
   ssl: {
-    rejectUnauthorized: false, // Required for Supabase
+    rejectUnauthorized: false,
   },
   max: 20,
   idleTimeoutMillis: 30000,
@@ -47,10 +40,4 @@ export async function testDatabaseConnection() {
     console.error('❌ Database test failed:', error);
     return false;
   }
-}
-
-// Close pool gracefully
-export async function closeDatabaseConnection() {
-  await pool.end();
-  console.log('✅ Database connection closed');
 }

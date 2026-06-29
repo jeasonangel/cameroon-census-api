@@ -13,7 +13,7 @@ export const config = {
   // Build database URL with encoded password
   databaseUrl: process.env.DATABASE_URL || (() => {
     const user = process.env.PGUSER || 'postgres.pndihochpbghcphpwvbyx';
-    const password = process.env.PGPASSWORD || 'Fnqhq9T8bDhr8yTP';
+    const password = process.env.PGPASSWORD || 'Mesanges1234';
     const host = process.env.PGHOST || 'aws-1-eu-west-2.pooler.supabase.com';
     const port = process.env.PGPORT || '5432';
     const database = process.env.PGDATABASE || 'postgres';
