@@ -1,19 +1,11 @@
+// src/config/index.ts
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Helper function to encode password
-function encodePassword(password: string) {
-  return encodeURIComponent(password);
-}
-console.log('📊 DATABASE_URL loaded:', process.env.DATABASE_URL ? '✅ Yes' : '❌ No');
-console.log('📊 DATABASE_URL:', process.env.DATABASE_URL?.replace(/:[^@]*@/, ':****@'));
 export const config = {
   port: parseInt(process.env.PORT || '8080', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  
-  // ✅ This reads DATABASE_URL from .env or environment variables
   databaseUrl: process.env.DATABASE_URL || '',
-  
   redisUrl: process.env.REDIS_URL || '',
   bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
   jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
@@ -24,6 +16,10 @@ export const config = {
     'https://frontend-production-1a46.up.railway.app,http://localhost:3000,http://localhost:5173',
 };
 
+console.log('📊 Config loaded:');
+console.log('📊 Environment:', config.nodeEnv);
+console.log('📊 Port:', config.port);
+console.log('📊 CORS Origins:', config.corsOrigin);
 // Rate limits per user type
 export const RATE_LIMITS: Record<string, number> = {
   ADMIN: -1, // unlimited

@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 export const API_BASE = import.meta.env.VITE_API_BASE || 
-                  import.meta.env.VITE_API_URL || 
-                  'https://cameroon-census-api-production.up.railway.app/api/v1';
+                        import.meta.env.VITE_API_URL || 
+                        'https://cameroon-census-api-production.up.railway.app/api/v1';
 
 console.log('🔧 API Base URL:', API_BASE);
 
@@ -17,14 +17,15 @@ export const api = axios.create({
   timeout: 30000,
 });
 
-// Request interceptor
+// Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token') || localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+    console.log('🚀 Request:', config.method?.toUpperCase(), config.url);
+    console.log('📋 Headers:', config.headers);
     return config;
   },
   (error) => {
@@ -36,11 +37,13 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ API Response:', response.status, response.config.url);
+    console.log('✅ Response:', response.status, response.config.url);
+    console.log('📋 Response Headers:', response.headers);
     return response;
   },
   (error) => {
-    console.error('❌ API Error:', error.response?.status, error.response?.data);
+    console.error('❌ Error:', error.response?.status, error.response?.data);
+    console.error('❌ Error Headers:', error.response?.headers);
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       if (!currentPath.startsWith('/login') && !currentPath.startsWith('/register')) {
@@ -53,6 +56,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 
 export interface User {
