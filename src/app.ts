@@ -19,35 +19,40 @@ const ALLOWED_ORIGINS = [
   'http://localhost:4173',
 ];
 
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, origin ?? '*');
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Total-Count'],
+  maxAge: 86400,
+};
+
 export function buildApp() {
   const app = express();
   app.set('trust proxy', true);
 
-  // 1. helmet FIRST — but with CORS-safe settings
+  // 1. Helmet with CORS-compatible settings
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     crossOriginOpenerPolicy: false,
     crossOriginEmbedderPolicy: false,
   }));
 
-  // 2. CORS — single middleware, no custom handler competing with it
-  app.use(cors({
-    origin: (origin, callback) => {
-      // Allow server-to-server requests (no origin) and known origins
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-        callback(null, origin ?? '*');
-      } else {
-        callback(new Error(`CORS blocked: ${origin}`));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
-    exposedHeaders: ['Content-Range', 'X-Total-Count'],
-    maxAge: 86400,
-  }));
+  // 2. Handle ALL OPTIONS preflight requests at the app level
+  //    This runs before any router, so requireSession never sees OPTIONS
+  app.options('*', cors(corsOptions));
 
-  // 3. Body parsing and utilities
+  // 3. Apply CORS headers to every other request
+  app.use(cors(corsOptions));
+
+  // 4. Body parsing and utilities
   app.use(compression());
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
@@ -55,7 +60,7 @@ export function buildApp() {
   app.use(requestTimer);
   app.use(usageLogger);
 
-  // 4. Routes
+  // 5. Routes
   app.get('/', (_req, res) => {
     res.json({ status: 'ok', message: 'Cameroon Census API is running' });
   });

@@ -4,21 +4,13 @@ import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
-// All analytics routes require authentication
-router.use(authenticate);
+// No router.use(authenticate) — applied per-route below
 
-// Region routes
-router.get('/regions', analyticsController.getAllRegions);
-router.get('/regions/:code', analyticsController.getRegionByCode);
-router.get('/regions/rank/water', analyticsController.getRegionsRankedByWater);
-
-// Department routes
-router.get('/departments/rank', analyticsController.getDepartmentRankings);
-
-// Comparison routes
-router.get('/compare/regions', analyticsController.compareRegions);
-
-// Best/Worst routes
-router.get('/best-worst', analyticsController.getBestWorst);
+router.get('/regions', authenticate, analyticsController.getAllRegions);
+router.get('/regions/:code', authenticate, analyticsController.getRegionByCode);
+router.get('/regions/rank/water', authenticate, analyticsController.getRegionsRankedByWater);
+router.get('/departments/rank', authenticate, analyticsController.getDepartmentRankings);
+router.get('/compare/regions', authenticate, analyticsController.compareRegions);
+router.get('/best-worst', authenticate, analyticsController.getBestWorst);
 
 export default router;

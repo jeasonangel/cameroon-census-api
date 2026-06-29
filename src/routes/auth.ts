@@ -9,6 +9,8 @@ import { requireSession, signSession } from '../middleware/session';
 
 const router = Router();
 
+// ─── Public routes (no auth) ────────────────────────────────────────────────
+
 const registerSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(128),
@@ -37,7 +39,6 @@ router.post('/register', async (req, res, next) => {
     );
     const user = rows[0];
     const token = signSession({ uid: user.id, email: user.email, user_type: user.user_type });
-    // NOTE: no API key is created automatically. User must click "Create API Key" in dashboard.
     res.status(201).json({ data: { user, token } });
   } catch (e) {
     next(e);
@@ -85,10 +86,11 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-// --- Authenticated dashboard endpoints (JWT) ---
-router.use(requireSession);
+// ─── Authenticated routes (JWT required) ────────────────────────────────────
+// requireSession is applied per-route, NOT via router.use()
+// This prevents it from intercepting OPTIONS preflight requests
 
-router.get('/me', async (req, res, next) => {
+router.get('/me', requireSession, async (req, res, next) => {
   try {
     const { rows } = await query(
       `SELECT id, email, full_name, user_type, organization, monthly_limit, requests_used, is_unlimited, created_at, last_login
@@ -103,7 +105,7 @@ router.get('/me', async (req, res, next) => {
 
 const createKeySchema = z.object({ name: z.string().min(1).max(100) });
 
-router.post('/keys', async (req, res, next) => {
+router.post('/keys', requireSession, async (req, res, next) => {
   try {
     if (req.user!.user_type === 'ADMIN') {
       throw Forbidden('Admin accounts do not use API keys — full access is via the dashboard.');
@@ -122,7 +124,7 @@ router.post('/keys', async (req, res, next) => {
   }
 });
 
-router.get('/keys', async (req, res, next) => {
+router.get('/keys', requireSession, async (req, res, next) => {
   try {
     const { rows } = await query(
       `SELECT id, name, key_prefix, is_active, created_at, last_used
@@ -135,7 +137,7 @@ router.get('/keys', async (req, res, next) => {
   }
 });
 
-router.delete('/keys/:keyId', async (req, res, next) => {
+router.delete('/keys/:keyId', requireSession, async (req, res, next) => {
   try {
     const keyId = parseInt(req.params.keyId, 10);
     if (isNaN(keyId)) throw BadRequest('Invalid key id');
@@ -150,7 +152,7 @@ router.delete('/keys/:keyId', async (req, res, next) => {
   }
 });
 
-router.get('/usage', async (req, res, next) => {
+router.get('/usage', requireSession, async (req, res, next) => {
   try {
     const { rows } = await query(
       `SELECT id, email, user_type, monthly_limit, requests_used, is_unlimited

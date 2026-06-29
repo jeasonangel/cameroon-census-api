@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { query } from '../db/pool.js';
-import { authenticateOrSession as authenticate } from '../middleware/either.js'; // ✅ Added .js
+import { authenticateOrSession as authenticate } from '../middleware/either.js';
 import { cacheGet, cacheSet, CACHE_TTL } from '../db/redis.js';
 import { BadRequest, NotFound } from '../utils/errors.js';
 
 const router = Router();
-router.use(authenticate);
+
+// No router.use(authenticate) — applied per-route below
 
 async function withCache<T>(key: string, ttl: number, fn: () => Promise<T>): Promise<T> {
   const hit = await cacheGet<T>(key);
@@ -15,7 +16,7 @@ async function withCache<T>(key: string, ttl: number, fn: () => Promise<T>): Pro
   return data;
 }
 
-router.get('/regions', async (_req, res, next) => {
+router.get('/regions', authenticate, async (_req, res, next) => {
   try {
     const data = await withCache('geo:regions', CACHE_TTL, async () => {
       const { rows } = await query(
@@ -25,12 +26,10 @@ router.get('/regions', async (_req, res, next) => {
       return rows;
     });
     res.json({ data });
-  } catch (e) {
-    next(e);
-  }
+  } catch (e) { next(e); }
 });
 
-router.get('/regions/:regionCode/departments', async (req, res, next) => {
+router.get('/regions/:regionCode/departments', authenticate, async (req, res, next) => {
   try {
     const code = req.params.regionCode;
     const data = await withCache(`geo:dept:${code}`, CACHE_TTL, async () => {
@@ -44,12 +43,10 @@ router.get('/regions/:regionCode/departments', async (req, res, next) => {
       return rows;
     });
     res.json({ data });
-  } catch (e) {
-    next(e);
-  }
+  } catch (e) { next(e); }
 });
 
-router.get('/departments/:departmentCode/districts', async (req, res, next) => {
+router.get('/departments/:departmentCode/districts', authenticate, async (req, res, next) => {
   try {
     const code = req.params.departmentCode;
     const data = await withCache(`geo:dist:${code}`, CACHE_TTL, async () => {
@@ -63,12 +60,10 @@ router.get('/departments/:departmentCode/districts', async (req, res, next) => {
       return rows;
     });
     res.json({ data });
-  } catch (e) {
-    next(e);
-  }
+  } catch (e) { next(e); }
 });
 
-router.get('/districts/:districtCode/villages', async (req, res, next) => {
+router.get('/districts/:districtCode/villages', authenticate, async (req, res, next) => {
   try {
     const code = req.params.districtCode;
     const data = await withCache(`geo:vill:${code}`, CACHE_TTL, async () => {
@@ -82,12 +77,10 @@ router.get('/districts/:districtCode/villages', async (req, res, next) => {
       return rows;
     });
     res.json({ data });
-  } catch (e) {
-    next(e);
-  }
+  } catch (e) { next(e); }
 });
 
-router.get('/search', async (req, res, next) => {
+router.get('/search', authenticate, async (req, res, next) => {
   try {
     const q = String(req.query.q || '').trim();
     if (q.length < 2) throw BadRequest('Query must be at least 2 characters');
@@ -97,9 +90,7 @@ router.get('/search', async (req, res, next) => {
       [`%${q}%`]
     );
     res.json({ data: rows });
-  } catch (e) {
-    next(e);
-  }
+  } catch (e) { next(e); }
 });
 
 export default router;
