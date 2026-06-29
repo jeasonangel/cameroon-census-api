@@ -8,7 +8,7 @@ function encodePassword(password: string) {
 console.log('📊 DATABASE_URL loaded:', process.env.DATABASE_URL ? '✅ Yes' : '❌ No');
 console.log('📊 DATABASE_URL:', process.env.DATABASE_URL?.replace(/:[^@]*@/, ':****@'));
 export const config = {
-  port: parseInt(process.env.PORT || '5000', 10),
+  port: parseInt(process.env.PORT || '8080', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // ✅ This reads DATABASE_URL from .env or environment variables
