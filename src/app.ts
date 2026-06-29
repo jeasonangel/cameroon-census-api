@@ -1,3 +1,4 @@
+// src/app.ts
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -20,46 +21,65 @@ export function buildApp() {
 
   app.use(helmet());
   
-  // Improved CORS configuration
-// In your src/app.ts - Update the CORS configuration
-
-
-// Improved CORS configuration
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = config.corsOrigin === '*' 
-      ? ['*'] 
-      : config.corsOrigin.split(',').map((s) => s.trim());
-    
-    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      if (config.nodeEnv === 'development') {
+  // ✅ FIXED CORS CONFIGURATION
+  const corsOptions = {
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      // List of allowed origins
+      const allowedOrigins = [
+        'https://frontend-production-1a46.up.railway.app',
+        'https://cameroon-census-frontend.up.railway.app',
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:4173',
+      ];
+      
+      // Check if origin is allowed
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         console.warn(`🚫 CORS blocked origin: ${origin}`);
-        callback(null, true);
+        // For development, allow all
+        if (process.env.NODE_ENV === 'development') {
+          callback(null, true);
+        } else {
+          callback(null, false);
+        }
       }
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
-  exposedHeaders: ['Content-Range', 'X-Total-Count'],
-};
-
-app.use(cors(corsOptions));
-
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-API-Key',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers'
+    ],
+    exposedHeaders: ['Content-Range', 'X-Total-Count'],
+    maxAge: 86400, // 24 hours
+  };
+  
+  app.use(cors(corsOptions));
+  
+  // ✅ Handle preflight requests explicitly
+  app.options('*', cors(corsOptions));
   
   app.use(compression());
   app.use(express.json({ limit: '2mb' }));
+  app.use(express.urlencoded({ extended: true }));
   app.use(morgan('tiny'));
   app.use(requestTimer);
   app.use(usageLogger);
 
-  // Root route for health checks
+  // Root route
   app.get('/', (_req, res) => {
     res.json({
       status: 'ok',
@@ -70,17 +90,17 @@ app.use(cors(corsOptions));
     });
   });
 
-  // Health check endpoint
+  // Health check
   app.get('/health', (_req, res) => {
     res.json({
       status: 'healthy',
       version: '1.1.0',
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
-      database: 'connected', // Add database check if needed
     });
   });
 
+  // Routes
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/geography', geographyRoutes);
   app.use('/api/v1', dataRoutes);
