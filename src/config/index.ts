@@ -5,36 +5,18 @@ dotenv.config();
 function encodePassword(password: string) {
   return encodeURIComponent(password);
 }
-
+console.log('📊 DATABASE_URL loaded:', process.env.DATABASE_URL ? '✅ Yes' : '❌ No');
+console.log('📊 DATABASE_URL:', process.env.DATABASE_URL?.replace(/:[^@]*@/, ':****@'));
 export const config = {
   port: parseInt(process.env.PORT || '5000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   
-  // Build database URL with encoded password
-  databaseUrl: process.env.DATABASE_URL || (() => {
-    const user = process.env.PGUSER || 'postgres.pndihochpbghcphpwvbyx';
-    const password = process.env.PGPASSWORD || 'Mesanges1234';
-    const host = process.env.PGHOST || 'aws-1-eu-west-2.pooler.supabase.com';
-    const port = process.env.PGPORT || '5432';
-    const database = process.env.PGDATABASE || 'postgres';
-    
-    // Encode password for URL
-    const encodedPassword = encodePassword(password);
-    return `postgresql://${user}:${encodedPassword}@${host}:${port}/${database}`;
-  })(),
-  
-  // Individual database params (for Supabase)
-  db: {
-    host: process.env.PGHOST || 'aws-1-eu-west-2.pooler.supabase.com',
-    port: parseInt(process.env.PGPORT || '5432', 10),
-    user: process.env.PGUSER || 'postgres.pndihochpbghcphpwvbyx',
-    password: process.env.PGPASSWORD || 'Mesanges1234',
-    database: process.env.PGDATABASE || 'postgres',
-  },
+  // ✅ This reads DATABASE_URL from .env or environment variables
+  databaseUrl: process.env.DATABASE_URL || '',
   
   redisUrl: process.env.REDIS_URL || '',
   bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
-  jwtSecret: process.env.JWT_SECRET || '7f3a9e2b4d1f8a6c3e5b7d9a2c4f6e8a',
+  jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   adminEmail: process.env.ADMIN_EMAIL || 'admin@census.cm',
   adminPassword: process.env.ADMIN_PASSWORD || 'Admin123!',

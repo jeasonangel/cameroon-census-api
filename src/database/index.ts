@@ -1,15 +1,12 @@
 // src/database/index.ts
 import { Pool } from 'pg';
+import { config } from '../config/index.js';
 
 console.log('🔌 Initializing database connection...');
 
-// Use individual connection parameters
+// Use config from config/index.ts
 const pool = new Pool({
-  host: process.env.PGHOST || 'aws-1-eu-west-2.pooler.supabase.com',
-  port: parseInt(process.env.PGPORT || '5432', 10),
-  user: process.env.PGUSER || 'postgres.pndihochpbghcphpwvbyx',
-  password: process.env.PGPASSWORD || 'Mesanges1234',
-  database: process.env.PGDATABASE || 'postgres',
+  connectionString: config.databaseUrl,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -40,4 +37,10 @@ export async function testDatabaseConnection() {
     console.error('❌ Database test failed:', error);
     return false;
   }
+}
+
+// Close pool gracefully
+export async function closeDatabaseConnection() {
+  await pool.end();
+  console.log('✅ Database connection closed');
 }
