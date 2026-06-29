@@ -16,43 +16,40 @@ import { requestTimer, usageLogger } from './middleware/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 export function buildApp() {
+  // ✅ Create app variable here
   const app = express();
   app.set('trust proxy', true);
 
-  app.use(helmet());
-  
-  // ✅ FIXED CORS CONFIGURATION
+  // ✅ HELMET - Allow CORS
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  }));
+
+  // ✅ CORS Configuration
+  const allowedOrigins = [
+    'https://frontend-production-1a46.up.railway.app',
+    'https://cameroon-census-frontend.up.railway.app',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:4173',
+  ];
+
   const corsOptions = {
     origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-      // Allow requests with no origin (like mobile apps or curl)
       if (!origin) {
         return callback(null, true);
       }
       
-      // List of allowed origins
-      const allowedOrigins = [
-        'https://frontend-production-1a46.up.railway.app',
-        'https://cameroon-census-frontend.up.railway.app',
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'http://localhost:4173',
-      ];
-      
-      // Check if origin is allowed
-      if (allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
         callback(null, true);
       } else {
         console.warn(`🚫 CORS blocked origin: ${origin}`);
-        // For development, allow all
-        if (process.env.NODE_ENV === 'development') {
-          callback(null, true);
-        } else {
-          callback(null, false);
-        }
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
@@ -61,23 +58,40 @@ export function buildApp() {
       'Accept',
       'Origin',
       'Access-Control-Request-Method',
-      'Access-Control-Request-Headers'
+      'Access-Control-Request-Headers',
     ],
     exposedHeaders: ['Content-Range', 'X-Total-Count'],
-    maxAge: 86400, // 24 hours
+    maxAge: 86400,
   };
-  
+
   app.use(cors(corsOptions));
-  
-  // ✅ Handle preflight requests explicitly
-  app.options('*', cors(corsOptions));
-  
+
+  // Handle OPTIONS requests
+  app.options('*', (req, res) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400');
+    res.sendStatus(204);
+  });
+
   app.use(compression());
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan('tiny'));
   app.use(requestTimer);
   app.use(usageLogger);
+
+  // Add CORS headers to every response
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    next();
+  });
 
   // Root route
   app.get('/', (_req, res) => {

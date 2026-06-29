@@ -1,3 +1,4 @@
+// src/server.ts
 import { buildApp } from './app.js';
 import { config } from './config/index.js';
 import { testDatabaseConnection } from './database/index.js';
@@ -21,16 +22,24 @@ async function startServer() {
     const app = buildApp();
     console.log('✅ App built successfully');
 
-    const PORT = config.port;
+    // ✅ Ensure port is a number
+    const PORT: number = parseInt(process.env.PORT || String(config.port || 8080), 10);
+    
+    console.log(`📊 Starting server on port: ${PORT}`);
 
-    // Start server
+    // Start server - bind to all interfaces
     const server = app.listen(PORT, '0.0.0.0', () => {
-      console.log(`✅ Cameroon Census API listening on :${PORT} [${config.nodeEnv}]`);
-      console.log(`✅ Health check: https://cameroon-census-api-production.up.railway.app/health`);
+      console.log(`✅ Cameroon Census API listening on port ${PORT}`);
+      console.log(`✅ Environment: ${config.nodeEnv}`);
+      console.log(`✅ Health check: /health`);
+      console.log(`✅ API base: /api/v1`);
     });
 
-    server.on('error', (error) => {
+    server.on('error', (error: any) => {
       console.error('💥 Server error:', error);
+      if (error.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use`);
+      }
     });
 
     // Handle graceful shutdown

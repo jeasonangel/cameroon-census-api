@@ -1,34 +1,46 @@
+// frontend/src/lib/api.ts
 import axios from 'axios';
 
-// ✅ Export API_BASE
 export const API_BASE = import.meta.env.VITE_API_BASE || 
-                        import.meta.env.VITE_API_URL || 
-                        'https://cameroon-census-api-production.up.railway.app/api/v1';
+                  import.meta.env.VITE_API_URL || 
+                  'https://cameroon-census-api-production.up.railway.app/api/v1';
 
-if (import.meta.env.DEV) {
-  console.log('🔧 API Base URL:', API_BASE);
-}
+console.log('🔧 API Base URL:', API_BASE);
 
-export const api = axios.create({ 
+export const api = axios.create({
   baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
   withCredentials: true,
   timeout: 30000,
 });
 
-api.interceptors.request.use((cfg) => {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-  if (token) {
-    cfg.headers.Authorization = `Bearer ${token}`;
-  }
-  return cfg;
-});
-
-api.interceptors.response.use(
-  (response) => response,
+// Request interceptor
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.url);
+    return config;
+  },
   (error) => {
+    console.error('❌ Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => {
+    console.log('✅ API Response:', response.status, response.config.url);
+    return response;
+  },
+  (error) => {
+    console.error('❌ API Error:', error.response?.status, error.response?.data);
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
       if (!currentPath.startsWith('/login') && !currentPath.startsWith('/register')) {
@@ -41,6 +53,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export interface User {
   id: number;
