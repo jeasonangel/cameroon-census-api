@@ -1,5 +1,6 @@
 node_modules
-dist
+# Build output
+dist/
 .env
 *.log
 .DS_Store
