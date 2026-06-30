@@ -45,9 +45,6 @@ export function buildApp() {
     crossOriginEmbedderPolicy: false,
   }));
 
-  // 2. Handle ALL OPTIONS preflight requests at the app level
-  //    This runs before any router, so requireSession never sees OPTIONS
-  app.options('*', cors(corsOptions));
 
   // 3. Apply CORS headers to every other request
   app.use(cors(corsOptions));
