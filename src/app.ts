@@ -39,7 +39,7 @@ const corsOptions: cors.CorsOptions = {
 
 export function buildApp() {
   const app = express();
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.set('trust proxy', true);
 
   // 1. Helmet with CORS-compatible settings
