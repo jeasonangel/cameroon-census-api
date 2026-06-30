@@ -34,8 +34,12 @@ const corsOptions: cors.CorsOptions = {
   maxAge: 86400,
 };
 
+
+
+
 export function buildApp() {
   const app = express();
+  app.use(cors());
   app.set('trust proxy', true);
 
   // 1. Helmet with CORS-compatible settings
@@ -45,6 +49,7 @@ export function buildApp() {
     crossOriginEmbedderPolicy: false,
   }));
 
+ 
 
 
 
