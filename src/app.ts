@@ -46,8 +46,7 @@ export function buildApp() {
   }));
 
 
-  // 3. Apply CORS headers to every other request
-  app.use(cors(corsOptions));
+
 
   // 4. Body parsing and utilities
   app.use(compression());
