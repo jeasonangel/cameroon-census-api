@@ -39,15 +39,15 @@ const corsOptions: cors.CorsOptions = {
 
 export function buildApp() {
   const app = express();
-  app.use(cors(corsOptions));
-  app.set('trust proxy', true);
+  app.use(cors());
+  //app.set('trust proxy', true);
 
   // 1. Helmet with CORS-compatible settings
-  app.use(helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    crossOriginOpenerPolicy: false,
-    crossOriginEmbedderPolicy: false,
-  }));
+ // app.use(helmet({
+   // crossOriginResourcePolicy: { policy: 'cross-origin' },
+    //crossOriginOpenerPolicy: false,
+    //crossOriginEmbedderPolicy: false,
+  //}));
 
  
 
