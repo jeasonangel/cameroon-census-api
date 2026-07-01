@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/',  // ✅ Important for Netlify
   server: {
     port: 3000,
     proxy: {
@@ -24,6 +25,5 @@ export default defineConfig({
         }
       }
     }
-  },
-  base: '/'
+  }
 })

@@ -1,0 +1,5 @@
+# On EC2 or locally, navigate to frontend
+cd frontend
+mkdir -p public
+echo "/* /index.html 200" > public/_redirects
+echo "/assets/* /assets/:splat 200" >> public/_redirects
