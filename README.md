@@ -16,6 +16,7 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env
+
 # edit .env to point to your Postgres + Redis
 
 # 3. Make sure PostGIS is installed in your Postgres database
