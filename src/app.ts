@@ -12,7 +12,7 @@ import { requestTimer, usageLogger } from './middleware/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 const ALLOWED_ORIGINS = [
-   'https://your-project.vercel.app',
+  'https://dancing-medovik-6d87cd.netlify.app/',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:4173',
