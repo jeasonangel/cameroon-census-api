@@ -1,5 +1,5 @@
-# On EC2 or locally, navigate to frontend
-cd frontend
-mkdir -p public
-echo "/* /index.html 200" > public/_redirects
-echo "/assets/* /assets/:splat 200" >> public/_redirects
+# Proxy API requests to EC2 backend
+/api/*  http://13.53.37.92:8080/api/v1/:splat  200  !  Force
+
+# SPA routing - all other requests go to index.html
+/*  /index.html  200

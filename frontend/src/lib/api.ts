@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 
-export const API_BASE = 'http://13.53.37.92:8080/api/v1'
+export const API_BASE = '/api';
 
 console.log('🔧 API Base URL:', API_BASE);
 
