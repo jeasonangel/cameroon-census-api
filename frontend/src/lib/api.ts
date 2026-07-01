@@ -1,11 +1,8 @@
 // frontend/src/lib/api.ts
 import axios from 'axios';
 
-// export const API_BASE = import.meta.env.VITE_API_BASE || 
-//                         import.meta.env.VITE_API_URL || 
-//                         'https://cameroon-census-api-production.up.railway.app/api/v1';
 
-export const API_BASE = 'https://api.jadeisp.net/api'
+export const API_BASE = 'http://13.53.37.92:8080/api/v1'
 
 console.log('🔧 API Base URL:', API_BASE);
 

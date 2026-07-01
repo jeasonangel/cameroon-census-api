@@ -13,7 +13,7 @@ export const config = {
   adminEmail: process.env.ADMIN_EMAIL || 'admin@census.cm',
   adminPassword: process.env.ADMIN_PASSWORD || 'Admin123!',
   corsOrigin: process.env.CORS_ORIGIN || 
-    'https://frontend-production-1a46.up.railway.app,http://localhost:3000,http://localhost:5173',
+    'https://dancing-medovik-6d87cd.netlify.app,http://localhost:3000,http://localhost:5173',
 };
 
 console.log('📊 Config loaded:');
