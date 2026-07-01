@@ -39,7 +39,7 @@ const corsOptions: cors.CorsOptions = {
 
 export function buildApp() {
   const app = express();
-  app.use(cors());
+  
   //app.set('trust proxy', true);
 
   // 1. Helmet with CORS-compatible settings
@@ -61,6 +61,7 @@ export function buildApp() {
   app.use(requestTimer);
   app.use(usageLogger);
 
+  app.use(cors())
   // 5. Routes
   app.get('/', (_req, res) => {
     res.json({ status: 'ok', message: 'Cameroon Census API is running' });
