@@ -12,8 +12,7 @@ import { requestTimer, usageLogger } from './middleware/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 const ALLOWED_ORIGINS = [
-  'https://frontend-production-1a46.up.railway.app',
-  'https://cameroon-census-frontend.up.railway.app',
+   'https://your-project.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:4173',
